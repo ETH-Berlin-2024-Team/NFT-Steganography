@@ -1,0 +1,7 @@
+- get receivers public key (not public address) from the last transaction of the wallet
+- encrypt the message with the receivers public key
+- embed the encrypted message into a picture
+- create an NFT with that picture
+- send the NFT
+- The receiver decrypts the message with his private key
+- be happy
