@@ -1,4 +1,5 @@
 "use client";
+
 import { Inter } from "next/font/google";
 import "./globals.css";
 import {
@@ -6,9 +7,11 @@ import {
   ThirdwebProvider,
   metamaskWallet,
 } from "@thirdweb-dev/react";
-import Navbar from "@/components/Navbar";
+import { Navbar } from "@/components/Navbar";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const inter = Inter({ subsets: ["latin"] });
+const activeChain = "sepolia";
 
 export default function RootLayout({
   children,
@@ -17,20 +20,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <ThirdwebProvider
-        activeChain={"sepolia"}
-        clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || ""}
-        supportedWallets={[
-          metamaskWallet({
-            recommended: true,
-          }),
-        ]}
-      >
-        <body className={inter.className}>
-          <Navbar />
-          {children}
-        </body>
-      </ThirdwebProvider>
+      <body className={inter.className}>
+        <ThirdwebProvider
+          activeChain={activeChain}
+          clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || ""}
+          supportedWallets={[
+            metamaskWallet({
+              recommended: true,
+            }),
+          ]}
+        >
+          <ChakraProvider>
+            <Navbar />
+            {children}
+          </ChakraProvider>
+        </ThirdwebProvider>
+      </body>
     </html>
   );
 }

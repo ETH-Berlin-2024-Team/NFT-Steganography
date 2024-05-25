@@ -1,17 +1,16 @@
 "use client";
 import { Web3Button, useContract, useLazyMint } from "@thirdweb-dev/react";
 import React from "react";
+import { NFT_DROP_ADDRESS } from "@/const/addresses";
 
-export default function page() {
-  const { contract } = useContract(
-    "0xd697cbd817ba5d0da1a886080530528c567272b8"
-  );
+export default function Page() {
+  const { contract } = useContract(NFT_DROP_ADDRESS);
   const { mutateAsync: lazyMint, isLoading, error } = useLazyMint(contract);
 
   return (
     <div className="flex items-center justify-center h-96">
       <Web3Button
-        contractAddress={"0xd697cbd817ba5d0da1a886080530528c567272b8"}
+        contractAddress={NFT_DROP_ADDRESS}
         action={() =>
           lazyMint({
             metadatas: [
@@ -20,14 +19,19 @@ export default function page() {
                 description:
                   "Get ready to peel out. In a world where clocks melt and fruits fly. Grab it before it skates away!",
                 image:
-                  "https://github.com/ETH-Berlin-2024-Team/NFT-Steganography/blob/main/banana.webp",
+                  "https://github.com/ETH-Berlin-2024-Team/NFT-Steganography/blob/main/banana.webp?raw=true",
               },
             ],
           })
         }
       >
-        Lazy Mint NFTs
+        {isLoading ? 'Minting...' : 'Lazy Mint NFTs'}
       </Web3Button>
+      <div>
+        {!!error &&
+        <p className="text-red-500">Error: {error.message}</p>
+        }
+      </div>
     </div>
   );
 }
