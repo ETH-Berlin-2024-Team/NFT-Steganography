@@ -2,7 +2,7 @@
 
 // Import necessary modules and components
 import { Avatar, Box, Container, Flex, Input, SimpleGrid, Skeleton, Stack, Text } from "@chakra-ui/react";
-import { MediaRenderer, ThirdwebNftMedia, Web3Button, useContract, useMinimumNextBid, useValidDirectListings, useValidEnglishAuctions } from "@thirdweb-dev/react";
+import { MediaRenderer, ThirdwebNftMedia, Web3Button, useContract, useValidDirectListings, useValidEnglishAuctions } from "@thirdweb-dev/react";
 import { NFT, ThirdwebSDK } from "@thirdweb-dev/sdk";
 import React, { useState } from "react";
 import { MARKETPLACE_ADDRESS, NFT_COLLECTION_ADDRESS } from "@/const/addresses";
@@ -14,19 +14,40 @@ type Props = {
     contractMetadata: any;
 };
 
-export default function TokenPage({ nft, contractMetadata }: Props) {
+export default function TokenPage({ params }: { params: { tokenId: string } }) {
+    const [nft, setNft] = useState<NFT | null>(null);
+    const [contractMetadata, setContractMetadata] = useState<any>(null);
+
+    React.useEffect(() => {
+        async function fetchData() {
+            const sdk = new ThirdwebSDK("sepolia");
+            const contract = await sdk.getContract(NFT_COLLECTION_ADDRESS);
+            const fetchedNft = await contract.erc721.get(params.tokenId);
+            let fetchedContractMetadata;
+
+            try {
+                fetchedContractMetadata = await contract.metadata.get();
+            } catch (e) {}
+
+            setNft(fetchedNft);
+            setContractMetadata(fetchedContractMetadata || null);
+        }
+
+        fetchData();
+    }, [params.tokenId]);
+
     const { contract: marketplace, isLoading: loadingMarketplace } = useContract(MARKETPLACE_ADDRESS, "marketplace-v3");
     const { contract: nftCollection } = useContract(NFT_COLLECTION_ADDRESS);
     const { data: directListing, isLoading: loadingDirectListing } = useValidDirectListings(marketplace, {
         tokenContract: NFT_COLLECTION_ADDRESS, 
-        tokenId: nft.metadata.id,
+        tokenId: nft?.metadata.id,
     });
 
     // Add these for auction section
     const [bidValue, setBidValue] = useState<string>();
     const { data: auctionListing, isLoading: loadingAuction } = useValidEnglishAuctions(marketplace, {
         tokenContract: NFT_COLLECTION_ADDRESS,
-        tokenId: nft.metadata.id,
+        tokenId: nft?.metadata.id,
     });
 
     async function buyListing() {
@@ -61,6 +82,10 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
         return txResult;
     }
     
+    if (!nft) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <Container maxW={"1200px"} p={5} my={5}>
             <SimpleGrid columns={2} spacing={6}>
@@ -163,49 +188,4 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
             </SimpleGrid>
         </Container>
     )
-}
-
-// Fetch NFT data and contract metadata
-async function fetchNFTData(tokenId: string) {
-    const sdk = new ThirdwebSDK("sepolia");
-    const contract = await sdk.getContract(NFT_COLLECTION_ADDRESS);
-    const nft = await contract.erc721.get(tokenId);
-    let contractMetadata;
-
-    try {
-        contractMetadata = await contract.metadata.get();
-    } catch (e) {}
-
-    return {
-        nft,
-        contractMetadata: contractMetadata || null,
-    };
-}
-
-// Define the dynamic page route
-export async function generateStaticParams() {
-    const sdk = new ThirdwebSDK("sepolia");
-    const contract = await sdk.getContract(NFT_COLLECTION_ADDRESS);
-    const nfts = await contract.erc721.getAll();
-
-    return nfts.map((nft) => ({
-        tokenId: nft.metadata.id,
-    }));
-}
-
-// Fetch data for the server component
-export async function generateMetadata({ params }: { params: { tokenId: string } }) {
-    const { nft } = await fetchNFTData(params.tokenId);
-
-    return {
-        title: nft.metadata.name,
-        description: nft.metadata.description,
-    };
-}
-
-// Server component that fetches data
-export async function generatePage({ params }: { params: { tokenId: string } }) {
-    const { nft, contractMetadata } = await fetchNFTData(params.tokenId);
-
-    return <TokenPage nft={nft} contractMetadata={contractMetadata} />;
 }
