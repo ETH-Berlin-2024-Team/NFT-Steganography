@@ -73,7 +73,7 @@ export default function TokenPage({ params }: { params: { tokenId: string } }) {
         } else if (directListing?.[0]){
             txResult = await marketplace?.offers.makeOffer({
                 assetContractAddress: NFT_COLLECTION_ADDRESS,
-                tokenId: nft.metadata.id,
+                tokenId: nft?.metadata.id,
                 totalPrice: bidValue,
             });
         } else {
