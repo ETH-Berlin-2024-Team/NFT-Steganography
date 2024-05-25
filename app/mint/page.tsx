@@ -4,14 +4,14 @@ import React from "react";
 
 export default function page() {
   const { contract } = useContract(
-    "0xd697cbd817ba5d0da1a886080530528c567272b8"
+    process.env.NEXT_PUBLIC_NFTDROP_CONTRACT || ""
   );
   const { mutateAsync: lazyMint, isLoading, error } = useLazyMint(contract);
 
   return (
     <div className="flex items-center justify-center h-96">
       <Web3Button
-        contractAddress={"0xd697cbd817ba5d0da1a886080530528c567272b8"}
+        contractAddress={process.env.NEXT_PUBLIC_NFTDROP_CONTRACT || ""}
         action={() =>
           lazyMint({
             metadatas: [
@@ -20,7 +20,7 @@ export default function page() {
                 description:
                   "Get ready to peel out. In a world where clocks melt and fruits fly. Grab it before it skates away!",
                 image:
-                  "https://github.com/ETH-Berlin-2024-Team/NFT-Steganography/blob/main/banana.webp",
+                  "https://raw.githubusercontent.com/ETH-Berlin-2024-Team/NFT-Steganography/main/banana.webp",
               },
             ],
           })
