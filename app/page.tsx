@@ -1,13 +1,4 @@
 "use client";
-import {
-  ThirdwebProvider,
-  metamaskWallet,
-  ConnectWallet,
-  Web3Button,
-  useMintNFT,
-  useAddress,
-  useContract,
-} from "@thirdweb-dev/react";
 import Link from "next/link";
 
 export default function Home() {

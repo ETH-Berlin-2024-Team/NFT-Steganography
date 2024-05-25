@@ -7,8 +7,10 @@ import {
   metamaskWallet,
 } from "@thirdweb-dev/react";
 import Navbar from "@/components/Navbar";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const inter = Inter({ subsets: ["latin"] });
+const activeChain = "sepolia";
 
 export default function RootLayout({
   children,
@@ -18,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <ThirdwebProvider
-        activeChain={"sepolia"}
+        activeChain={activeChain}
         clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || ""}
         supportedWallets={[
           metamaskWallet({
@@ -26,10 +28,12 @@ export default function RootLayout({
           }),
         ]}
       >
+        <ChakraProvider>
         <body className={inter.className}>
           <Navbar />
           {children}
         </body>
+        </ChakraProvider>
       </ThirdwebProvider>
     </html>
   );
