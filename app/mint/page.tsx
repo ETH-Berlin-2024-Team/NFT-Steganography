@@ -1,7 +1,7 @@
 "use client";
 import { Web3Button, useContract, useLazyMint } from "@thirdweb-dev/react";
 import React from "react";
-import { NFT_DROP_ADDRESS } from "../const/addresses";
+import { NFT_DROP_ADDRESS } from "@/const/addresses";
 
 export default function Page() {
   const { contract } = useContract(NFT_DROP_ADDRESS);
@@ -27,7 +27,11 @@ export default function Page() {
       >
         {isLoading ? 'Minting...' : 'Lazy Mint NFTs'}
       </Web3Button>
-      {error && <p className="text-red-500">Error: {error.message}</p>}
+      <div>
+        {!!error &&
+        <p className="text-red-500">Error: {error.message}</p>
+        }
+      </div>
     </div>
   );
 }

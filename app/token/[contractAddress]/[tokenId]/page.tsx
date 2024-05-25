@@ -1,64 +1,46 @@
+"use client";
+
+// Import necessary modules and components
 import { Avatar, Box, Container, Flex, Input, SimpleGrid, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { MediaRenderer, ThirdwebNftMedia, Web3Button, useContract, useMinimumNextBid, useValidDirectListings, useValidEnglishAuctions } from "@thirdweb-dev/react";
 import { NFT, ThirdwebSDK } from "@thirdweb-dev/sdk";
 import React, { useState } from "react";
-import { 
-    MARKETPLACE_ADDRESS,
-    NFT_COLLECTION_ADDRESS 
-} from "../../const/addresses";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { MARKETPLACE_ADDRESS, NFT_COLLECTION_ADDRESS } from "@/const/addresses";
 import Link from "next/link";
 
+// Define the TokenPage component
 type Props = {
     nft: NFT;
     contractMetadata: any;
 };
 
 export default function TokenPage({ nft, contractMetadata }: Props) {
-    const { contract: marketplace, isLoading: loadingMarketplace } = 
-        useContract(
-            MARKETPLACE_ADDRESS, 
-            "marketplace-v3"
-        );
-
+    const { contract: marketplace, isLoading: loadingMarketplace } = useContract(MARKETPLACE_ADDRESS, "marketplace-v3");
     const { contract: nftCollection } = useContract(NFT_COLLECTION_ADDRESS);
+    const { data: directListing, isLoading: loadingDirectListing } = useValidDirectListings(marketplace, {
+        tokenContract: NFT_COLLECTION_ADDRESS, 
+        tokenId: nft.metadata.id,
+    });
 
-    const { data: directListing, isLoading: loadingDirectListing } = 
-        useValidDirectListings(marketplace, {
-            tokenContract: NFT_COLLECTION_ADDRESS, 
-            tokenId: nft.metadata.id,
-        });
-
-    //Add these for auction section
+    // Add these for auction section
     const [bidValue, setBidValue] = useState<string>();
-
-    const { data: auctionListing, isLoading: loadingAuction } =
-        useValidEnglishAuctions(marketplace, {
-            tokenContract: NFT_COLLECTION_ADDRESS,
-            tokenId: nft.metadata.id,
-        });
+    const { data: auctionListing, isLoading: loadingAuction } = useValidEnglishAuctions(marketplace, {
+        tokenContract: NFT_COLLECTION_ADDRESS,
+        tokenId: nft.metadata.id,
+    });
 
     async function buyListing() {
         let txResult;
-
-        //Add for auction section
         if (auctionListing?.[0]) {
-            txResult = await marketplace?.englishAuctions.buyoutAuction(
-                auctionListing[0].id
-            );
+            txResult = await marketplace?.englishAuctions.buyoutAuction(auctionListing[0].id);
         } else if (directListing?.[0]){
-            txResult = await marketplace?.directListings.buyFromListing(
-                directListing[0].id,
-                1
-            );
+            txResult = await marketplace?.directListings.buyFromListing(directListing[0].id, 1);
         } else {
             throw new Error("No listing found");
         }
-
         return txResult;
     }
 
-    
     async function createBidOffer() {
         let txResult;
         if(!bidValue) {
@@ -66,16 +48,13 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
         }
 
         if (auctionListing?.[0]) {
-            txResult = await marketplace?.englishAuctions.makeBid(
-                auctionListing[0].id,
-                bidValue
-            );
+            txResult = await marketplace?.englishAuctions.makeBid(auctionListing[0].id, bidValue);
         } else if (directListing?.[0]){
             txResult = await marketplace?.offers.makeOffer({
                 assetContractAddress: NFT_COLLECTION_ADDRESS,
                 tokenId: nft.metadata.id,
                 totalPrice: bidValue,
-            })
+            });
         } else {
             throw new Error("No listing found");
         }
@@ -88,11 +67,7 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
                 <Stack spacing={"20px"}>
                     <Box borderRadius={"6px"} overflow={"hidden"}>
                         <Skeleton isLoaded={!loadingMarketplace && !loadingDirectListing}>
-                            <ThirdwebNftMedia
-                                metadata={nft.metadata}
-                                width="100%"
-                                height="100%"
-                            />
+                            <ThirdwebNftMedia metadata={nft.metadata} width="100%" height="100%" />
                         </Skeleton>
                     </Box>
                     <Box>
@@ -102,14 +77,12 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
                     <Box>
                         <Text fontWeight={"bold"}>Traits:</Text>
                         <SimpleGrid columns={2} spacing={4}>
-                        {Object.entries(nft?.metadata?.attributes || {}).map(
-                        ([key, value]) => (
+                        {Object.entries(nft?.metadata?.attributes || {}).map(([key, value]) => (
                             <Flex key={key} direction={"column"} alignItems={"center"} justifyContent={"center"} borderWidth={1} p={"8px"} borderRadius={"4px"}>
                                 <Text fontSize={"small"}>{value.trait_type}</Text>
                                 <Text fontSize={"small"} fontWeight={"bold"}>{value.value}</Text>
                             </Flex>
-                        )
-                        )}
+                        ))}
                         </SimpleGrid>
                     </Box>
                 </Stack>
@@ -118,22 +91,16 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
                     {contractMetadata && (
                         <Flex alignItems={"center"}>
                             <Box borderRadius={"4px"} overflow={"hidden"} mr={"10px"}>
-                                <MediaRenderer
-                                    src={contractMetadata.image}
-                                    height="32px"
-                                    width="32px"
-                                />
+                                <MediaRenderer src={contractMetadata.image} height="32px" width="32px" />
                             </Box>
                             <Text fontWeight={"bold"}>{contractMetadata.name}</Text>
                         </Flex>
                     )}
                     <Box mx={2.5}>
                         <Text fontSize={"4xl"} fontWeight={"bold"}>{nft.metadata.name}</Text>
-                        <Link
-                            href={`/profile/${nft.owner}`}
-                        >
+                        <Link href={`/profile/${nft.owner}`}>
                             <Flex direction={"row"} alignItems={"center"}>
-                                <Avatar  src='https://bit.ly/broken-link' h={"24px"} w={"24px"} mr={"10px"}/>
+                                <Avatar src='https://bit.ly/broken-link' h={"24px"} w={"24px"} mr={"10px"} />
                                 <Text fontSize={"small"}>{nft.owner.slice(0,6)}...{nft.owner.slice(-4)}</Text>
                             </Flex>
                         </Link>
@@ -160,11 +127,11 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
                             {auctionListing && auctionListing[0] && (
                                 <Flex direction={"column"}>
                                     <Text color={"darkgray"}>Bids starting from</Text>
-                                <Text fontSize={"3xl"} fontWeight={"bold"}>
-                                    {auctionListing[0]?.minimumBidCurrencyValue.displayValue}
-                                    {" " + auctionListing[0]?.minimumBidCurrencyValue.symbol}
-                                </Text>
-                                <Text></Text>
+                                    <Text fontSize={"3xl"} fontWeight={"bold"}>
+                                        {auctionListing[0]?.minimumBidCurrencyValue.displayValue}
+                                        {" " + auctionListing[0]?.minimumBidCurrencyValue.symbol}
+                                    </Text>
+                                    <Text></Text>
                                 </Flex>
                             )}
                         </Skeleton>
@@ -180,9 +147,7 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
                             <Flex direction={"column"}>
                                 <Input
                                     mb={5}
-                                    defaultValue={
-                                        auctionListing?.[0]?.minimumBidCurrencyValue?.displayValue || 0
-                                    }
+                                    defaultValue={auctionListing?.[0]?.minimumBidCurrencyValue?.displayValue || 0}
                                     type={"number"}
                                     onChange={(e) => setBidValue(e.target.value)}
                                 />
@@ -196,53 +161,51 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
                     </Skeleton>
                 </Stack>
             </SimpleGrid>
-            
         </Container>
     )
-};
+}
 
-export const getStaticProps: GetStaticProps = async (context) => {
-    const tokenId = context.params?.tokenId as string;
-  
-    const sdk = new ThirdwebSDK("mumbai");
-  
+// Fetch NFT data and contract metadata
+async function fetchNFTData(tokenId: string) {
+    const sdk = new ThirdwebSDK("sepolia");
     const contract = await sdk.getContract(NFT_COLLECTION_ADDRESS);
-  
     const nft = await contract.erc721.get(tokenId);
-  
     let contractMetadata;
-  
+
     try {
-      contractMetadata = await contract.metadata.get();
+        contractMetadata = await contract.metadata.get();
     } catch (e) {}
-  
+
     return {
-      props: {
         nft,
         contractMetadata: contractMetadata || null,
-      },
-      revalidate: 1, // https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration
     };
-  };
+}
 
-  export const getStaticPaths: GetStaticPaths = async () => {
-    const sdk = new ThirdwebSDK("mumbai");
-  
+// Define the dynamic page route
+export async function generateStaticParams() {
+    const sdk = new ThirdwebSDK("sepolia");
     const contract = await sdk.getContract(NFT_COLLECTION_ADDRESS);
-  
     const nfts = await contract.erc721.getAll();
-  
-    const paths = nfts.map((nft) => {
-      return {
-        params: {
-          contractAddress: NFT_COLLECTION_ADDRESS,
-          tokenId: nft.metadata.id,
-        },
-      };
-    });
-  
+
+    return nfts.map((nft) => ({
+        tokenId: nft.metadata.id,
+    }));
+}
+
+// Fetch data for the server component
+export async function generateMetadata({ params }: { params: { tokenId: string } }) {
+    const { nft } = await fetchNFTData(params.tokenId);
+
     return {
-      paths,
-      fallback: "blocking", // can also be true or 'blocking'
+        title: nft.metadata.name,
+        description: nft.metadata.description,
     };
-  };
+}
+
+// Server component that fetches data
+export async function generatePage({ params }: { params: { tokenId: string } }) {
+    const { nft, contractMetadata } = await fetchNFTData(params.tokenId);
+
+    return <TokenPage nft={nft} contractMetadata={contractMetadata} />;
+}

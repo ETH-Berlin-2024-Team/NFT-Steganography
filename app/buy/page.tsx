@@ -1,7 +1,9 @@
+"use client";
+
 import React from "react";
 import { Container, Heading, Text } from "@chakra-ui/react";
-import NFTGrid from "../components/NFTGrid";
-import { NFT_COLLECTION_ADDRESS } from "../const/addresses";
+import NFTGrid from "@/components/NFTGrid";
+import { NFT_COLLECTION_ADDRESS } from "@/const/addresses";
 import { useContract, useNFTs } from "@thirdweb-dev/react";
 
 export default function Buy() {

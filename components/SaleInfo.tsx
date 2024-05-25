@@ -1,9 +1,9 @@
 import React from "react";
 import { NFT as NFTType } from "@thirdweb-dev/sdk";
-import { useRouter } from "next/router";
+import { useRouter } from 'next/navigation'
 import { useForm } from "react-hook-form";
 import { Web3Button, useContract, useCreateAuctionListing, useCreateDirectListing } from "@thirdweb-dev/react";
-import { MARKETPLACE_ADDRESS, NFT_COLLECTION_ADDRESS } from "../const/addresses";
+import { MARKETPLACE_ADDRESS, NFT_COLLECTION_ADDRESS } from "@/const/addresses";
 import { Box, Input, Stack, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
 
 type Props = {

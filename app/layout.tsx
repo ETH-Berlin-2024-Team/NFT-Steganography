@@ -1,4 +1,5 @@
 "use client";
+
 import { Inter } from "next/font/google";
 import "./globals.css";
 import {
@@ -19,22 +20,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <ThirdwebProvider
-        activeChain={activeChain}
-        clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || ""}
-        supportedWallets={[
-          metamaskWallet({
-            recommended: true,
-          }),
-        ]}
-      >
-        <ChakraProvider>
-        <body className={inter.className}>
-          <Navbar />
-          {children}
-        </body>
-        </ChakraProvider>
-      </ThirdwebProvider>
+      <body className={inter.className}>
+        <ThirdwebProvider
+          activeChain={activeChain}
+          clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || ""}
+          supportedWallets={[
+            metamaskWallet({
+              recommended: true,
+            }),
+          ]}
+        >
+          <ChakraProvider>
+            <Navbar />
+            {children}
+          </ChakraProvider>
+        </ThirdwebProvider>
+      </body>
     </html>
   );
 }
