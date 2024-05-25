@@ -6,7 +6,7 @@ import {
   ThirdwebProvider,
   metamaskWallet,
 } from "@thirdweb-dev/react";
-import Navbar from "@/components/Navbar";
+import { Navbar } from "@/components/Navbar";
 import { ChakraProvider } from "@chakra-ui/react";
 
 const inter = Inter({ subsets: ["latin"] });
