@@ -3,23 +3,19 @@ import {
   ThirdwebProvider,
   metamaskWallet,
   ConnectWallet,
+  Web3Button,
+  useMintNFT,
+  useAddress,
+  useContract,
 } from "@thirdweb-dev/react";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <ThirdwebProvider
-        activeChain={"sepolia"}
-        clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || ""}
-        supportedWallets={[
-          metamaskWallet({
-            recommended: true,
-          }),
-        ]}
-      >
-        <ConnectWallet />
-        <p>TEST</p>
-      </ThirdwebProvider>
+      <Link href="/mint">
+        <button>Go to Mint</button>
+      </Link>
     </main>
   );
 }
